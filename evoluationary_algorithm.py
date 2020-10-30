@@ -9,7 +9,7 @@ from individual import Individual
 from network import Network
 
 
-class EA:
+class EvolutionaryAlgorithm:
 
     def __init__(
         self,
@@ -34,7 +34,7 @@ class EA:
 
     def evaluate(self, individuals: List[Individual]) -> List[int]:
         return list(map(lambda ind: self._evaluate_individual(individual=ind), individuals))
-    
+
     def _evaluate_individual(self, individual: Individual) -> int:
         state = self.env.reset()
         self.network.set_weights(individual)
