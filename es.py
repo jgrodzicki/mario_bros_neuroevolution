@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from typing import List, Tuple
 
 from nes_py.wrappers import JoypadSpace
@@ -62,18 +63,18 @@ class ES(EvolutionaryAlgorithm):
 
         idxs = np.argsort(evals)[-self.population_size:]
 
-        selected_individuals = [None] * self.population_size
+        selected_individuals = [Individual(weights=torch.Tensor([]))] * self.population_size
         for i, idx in enumerate(idxs):
             selected_individuals[i] = all_individuals[idx]
 
-        selected_evals = evals[idxs]
+        selected_evals: List[int] = evals[idxs]
 
         return selected_individuals, selected_evals
 
     def parent_selection(self, population: List[Individual], evals: List[int]) -> List[Individual]:
         idxs = np.argsort(evals)[-self.population_size // 2:]
 
-        selected_individuals = [None] * (self.population_size // 2)
+        selected_individuals = [Individual(weights=torch.Tensor([]))] * (self.population_size // 2)
         for i, idx in enumerate(idxs):
             selected_individuals[i] = population[idx]
 

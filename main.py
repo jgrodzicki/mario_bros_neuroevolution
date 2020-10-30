@@ -5,25 +5,14 @@ import gym_super_mario_bros
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
 from es import ES
-from network import Network, CUDA
+from network import Network, CUDA, DEFAULT_NETWORK
 
 
 def main():
     env = gym_super_mario_bros.make('SuperMarioBros-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
 
-    network = Network(layers=nn.Sequential(
-        nn.Conv2d(in_channels=3, out_channels=5, kernel_size=(3, 3)),
-        nn.MaxPool2d(kernel_size=(3, 3)),
-        nn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3, 3)),
-        nn.MaxPool2d(kernel_size=(3, 3)),
-        nn.Conv2d(in_channels=5, out_channels=1, kernel_size=(3, 3)),
-        nn.MaxPool2d(kernel_size=(3, 3)),
-        nn.Flatten(1, -1),
-        nn.Linear(56, 10),
-        nn.Tanh(),
-        nn.Linear(10, 1),
-    ))
+    network = DEFAULT_NETWORK
 
     if CUDA:
         network = network.cuda()

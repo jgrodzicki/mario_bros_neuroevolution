@@ -8,6 +8,20 @@ from individual import Individual
 CUDA = torch.cuda.is_available()
 
 
+DEFAULT_NETWORK = Network(layers=nn.Sequential(
+    nn.Conv2d(in_channels=3, out_channels=5, kernel_size=(3, 3)),
+    nn.MaxPool2d(kernel_size=(3, 3)),
+    nn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3, 3)),
+    nn.MaxPool2d(kernel_size=(3, 3)),
+    nn.Conv2d(in_channels=5, out_channels=1, kernel_size=(3, 3)),
+    nn.MaxPool2d(kernel_size=(3, 3)),
+    nn.Flatten(1, -1),
+    nn.Linear(56, 10),
+    nn.Tanh(),
+    nn.Linear(10, 1),
+))
+
+
 def to_np(x: Union[np.ndarray, torch.Tensor]) -> np.ndarray:
     return x.detach().cpu().numpy()
 

@@ -51,7 +51,7 @@ class EvolutionaryAlgorithm:
                 self.env.reset()
                 break
 
-        return reward
+        return individual_reward
 
     @abstractmethod
     def mutate(self, parents: List[Individual]) -> List[Individual]:
