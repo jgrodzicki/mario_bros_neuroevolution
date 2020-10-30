@@ -11,7 +11,6 @@ from network import Network
 
 class EA:
 
-    @abstractmethod
     def __init__(
         self,
         env: NESEnv,
@@ -32,21 +31,19 @@ class EA:
     @abstractmethod
     def random_population(self) -> List[Individual]:
         raise NotImplementedError()
-    
-    @abstractmethod
+
     def evaluate(self, individuals: List[Individual]) -> List[int]:
-        evals: List[int] = [0] * len(individuals)
+        return list(map(lambda ind: self._evaluate_individual(individual=ind), individuals))
+    
+    def _evaluate_individual(self, individual: Individual) -> int:
+        state = self.env.reset()
+        self.network.set_weights(individual)
 
-        for i, individual in enumerate(individuals):
-            state = self.env.reset()
-            self.network.set_weights(individual)
+        for _ in range(self.eval_iters):
+            action = self.network.forward(state)
+            state, reward, done, info = self.env.step(action)
 
-            for _ in range(self.eval_iters):
-                action = self.network.forward(state)
-                state, reward, done, info = self.env.step(action)
-
-            evals[i] = info['score']
-        return evals
+        return info['score']
 
     @abstractmethod
     def mutate(self, parents: List[Individual]) -> List[Individual]:
