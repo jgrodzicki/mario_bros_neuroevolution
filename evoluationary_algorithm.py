@@ -1,9 +1,10 @@
 from abc import abstractmethod
-import numpy as np  # type: ignore
-import pandas as pd  # type: ignore
-from typing import List
-from tqdm import tqdm  # type: ignore
-from nes_py.nes_env import NESEnv  # type: ignore
+import numpy as np
+import pandas as pd
+from typing import List, Tuple
+from tqdm import tqdm
+
+from nes_py.nes_env import NESEnv
 
 from individual import Individual
 from network import Network
@@ -57,10 +58,10 @@ class EvolutionaryAlgorithm:
     def selection(
         self,
         population: List[Individual],
-        population_evals: List[float],
+        population_evals: List[int],
         children: List[Individual],
-        children_evals: List[float]
-    ) -> List[Individual]:
+        children_evals: List[int]
+    ) -> Tuple[List[Individual], List[int]]:
         raise NotImplementedError()
     
     @abstractmethod
@@ -75,7 +76,7 @@ class EvolutionaryAlgorithm:
             evals = self.evaluate(individuals=population)
             
             parents = self.parent_selection(population=population)
-            children = self.mutate(parents[:, :])
+            children = self.mutate(parents)
             children_evals = self.evaluate(individuals=children)
             
             population, evals = self.selection(
