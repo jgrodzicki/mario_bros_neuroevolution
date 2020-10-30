@@ -80,8 +80,12 @@ class EvolutionaryAlgorithm:
 
         population = self.random_population()
         evals = self.evaluate(individuals=population)
+
+        pbar = tqdm(total=self.max_iters, desc='Training', position=0, leave=True)
         
-        for it in tqdm(range(self.max_iters), desc='Training', position=0, leave=True):
+        for it in range(self.max_iters):
+            pbar.update(1)
+
             parents = self.parent_selection(population=population, evals=evals)
             children = self.mutate(parents)
             children_evals = self.evaluate(individuals=children)
@@ -97,6 +101,8 @@ class EvolutionaryAlgorithm:
             
             if max(evals) > best_eval:
                 best_eval = max(evals)
+                pbar.desc = f'Training (best eval: {best_eval} in {it} iter)'
+
                 np.save(
                     f'models/{type(self).__name__}/best_inds/{it}.npy',
                     population[np.argmax(evals)],
@@ -105,3 +111,5 @@ class EvolutionaryAlgorithm:
 
             if it % 50 == 0:
                 self.history_df.to_csv(f'models/{type(self).__name__}/history_df.csv', index=False)
+
+        pbar.close()
