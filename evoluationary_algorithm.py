@@ -90,4 +90,11 @@ class EvolutionaryAlgorithm:
             
             if np.max(evals) > best_eval:
                 best_eval = np.max(evals)
-                np.save(f'models/{type(self).__name__}/{it}.npy', population[np.argmax(evals)], allow_pickle=True)
+                np.save(
+                    f'models/{type(self).__name__}/best_inds/{it}.npy',
+                    population[np.argmax(evals)],
+                    allow_pickle=True,
+                )
+
+            if it % 50 == 0:
+                self.history_df.to_csv(f'models/{type(self).__name__}/history_df.csv', index=False)
