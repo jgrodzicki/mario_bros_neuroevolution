@@ -1,10 +1,11 @@
 from abc import abstractmethod
 import numpy as np
 import pandas as pd
+from statistics import mean
 from typing import List, Tuple
 from tqdm import tqdm
 
-from nes_py.nes_env import NESEnv
+from nes_py.wrappers import JoypadSpace
 
 from individual import Individual
 from network import Network
@@ -14,7 +15,7 @@ class EvolutionaryAlgorithm:
 
     def __init__(
         self,
-        env: NESEnv,
+        env: JoypadSpace,
         network: Network,
         population_size: int,
         individual_len: int,
@@ -49,11 +50,11 @@ class EvolutionaryAlgorithm:
     @abstractmethod
     def mutate(self, parents: List[Individual]) -> List[Individual]:
         raise NotImplementedError()
-    
+
     @abstractmethod
     def crossover(self, ind_1: Individual, ind_2: Individual) -> List[Individual]:
         raise NotImplementedError()
-    
+
     @abstractmethod
     def selection(
         self,
@@ -63,9 +64,9 @@ class EvolutionaryAlgorithm:
         children_evals: List[int]
     ) -> Tuple[List[Individual], List[int]]:
         raise NotImplementedError()
-    
+
     @abstractmethod
-    def parent_selection(self, population: List[Individual]) -> List[Individual]:
+    def parent_selection(self, population: List[Individual], evals: List[int]) -> List[Individual]:
         raise NotImplementedError()
     
     def run(self) -> None:
@@ -75,7 +76,7 @@ class EvolutionaryAlgorithm:
             population = self.random_population()
             evals = self.evaluate(individuals=population)
             
-            parents = self.parent_selection(population=population)
+            parents = self.parent_selection(population=population, evals=evals)
             children = self.mutate(parents)
             children_evals = self.evaluate(individuals=children)
             
@@ -86,10 +87,10 @@ class EvolutionaryAlgorithm:
                 children_evals=children_evals,
             )
             
-            self.history_df.loc[len(self.history_df)] = [it, np.min(evals), np.mean(evals), np.min(evals)]
+            self.history_df.loc[len(self.history_df)] = [it, min(evals), mean(evals), max(evals)]
             
-            if np.max(evals) > best_eval:
-                best_eval = np.max(evals)
+            if max(evals) > best_eval:
+                best_eval = max(evals)
                 np.save(
                     f'models/{type(self).__name__}/best_inds/{it}.npy',
                     population[np.argmax(evals)],

@@ -1,3 +1,6 @@
-from typing import NewType, List
+import numpy as np
+from typing import NamedTuple
 
-Individual = NewType('Individual', List[float])
+Individual = NamedTuple('Individual', (
+    ('weights', np.ndarray),
+))
