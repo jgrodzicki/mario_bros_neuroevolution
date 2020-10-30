@@ -58,16 +58,23 @@ class ES(EvolutionaryAlgorithm):
         children_evals: List[int],
     ) -> Tuple[List[Individual], List[int]]:
         evals = np.append(population_evals, children_evals)
-        all_individuals = np.stack((population, children), axis=1)
+        all_individuals = list(population + children)
 
         idxs = np.argsort(evals)[-self.population_size:]
-        selected_individuals = all_individuals[idxs]
+
+        selected_individuals = [None] * self.population_size
+        for i, idx in enumerate(idxs):
+            selected_individuals[i] = all_individuals[idx]
+
         selected_evals = evals[idxs]
 
         return selected_individuals, selected_evals
 
     def parent_selection(self, population: List[Individual], evals: List[int]) -> List[Individual]:
         idxs = np.argsort(evals)[-self.population_size // 2:]
-        selected_individuals = population[idxs]
+
+        selected_individuals = [None] * (self.population_size // 2)
+        for i, idx in enumerate(idxs):
+            selected_individuals[i] = population[idx]
 
         return selected_individuals

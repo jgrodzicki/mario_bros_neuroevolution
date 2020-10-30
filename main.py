@@ -5,7 +5,7 @@ import gym_super_mario_bros
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
 from es import ES
-from network import Network
+from network import Network, CUDA
 
 
 def main():
@@ -25,19 +25,20 @@ def main():
         nn.Linear(10, 1),
     ))
 
+    if CUDA:
+        network = network.cuda()
+
     agent = ES(
         env=env,
         network=network,
-        population_size=10,
+        population_size=50,
         individual_len=997,
         eval_iters=500,
-        max_iters=1,
+        max_iters=5,
         mutation_chance=0.001,
     )
 
-    # agent.run()
-    pop = agent.random_population()
-    agent.evaluate(pop)
+    agent.run()
 
 
 if __name__ == '__main__':
