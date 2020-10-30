@@ -35,15 +35,18 @@ class EvolutionaryAlgorithm:
         raise NotImplementedError()
 
     def evaluate(self, individuals: List[Individual]) -> List[int]:
-        return list(map(lambda ind: self._evaluate_individual(individual=ind), individuals))
+        return list(map(lambda ind: self._evaluate_individual(individual=ind), tqdm(individuals)))
 
     def _evaluate_individual(self, individual: Individual) -> int:
         state = self.env.reset()
-        self.network.set_weights(individual)
+        self.network.set_weights(individual.weights)
 
         for _ in range(self.eval_iters):
             action = self.network.forward(state)
             state, reward, done, info = self.env.step(action)
+            if done:
+                self.env.reset()
+                break
 
         return info['score']
 
@@ -75,18 +78,18 @@ class EvolutionaryAlgorithm:
         for it in tqdm(range(self.max_iters), desc='Training', position=0, leave=True):
             population = self.random_population()
             evals = self.evaluate(individuals=population)
-            
+
             parents = self.parent_selection(population=population, evals=evals)
             children = self.mutate(parents)
             children_evals = self.evaluate(individuals=children)
-            
+
             population, evals = self.selection(
                 population=population,
                 population_evals=evals,
                 children=children,
                 children_evals=children_evals,
             )
-            
+
             self.history_df.loc[len(self.history_df)] = [it, min(evals), mean(evals), max(evals)]
             
             if max(evals) > best_eval:

@@ -8,11 +8,11 @@ from individual import Individual
 CUDA = torch.cuda.is_available()
 
 
-def to_np(x: Union[np.ndarray[np.float32], torch.Tensor]) -> np.ndarray[np.float32]:
+def to_np(x: Union[np.ndarray, torch.Tensor]) -> np.ndarray:
     return x.detach().cpu().numpy()
 
 
-def to_tensor(x: Union[np.ndarray[np.float32], torch.Tensor], requires_grad: bool = False) -> torch.Tensor:
+def to_tensor(x: Union[np.ndarray, torch.Tensor], requires_grad: bool = False) -> torch.Tensor:
     x = torch.from_numpy(x)
     if CUDA:
         x = x.cuda()
@@ -28,10 +28,11 @@ class Network(nn.Module):
         super(Network, self).__init__()
         self.layers = layers
 
-    def forward(self, state: np.ndarray[np.float32]) -> bytearray:
-        return self.layers.forward(state)
+    def forward(self, state: np.ndarray) -> int:
+        output = self.layers.forward(torch.Tensor(state.copy()).view(1, 3, 240, 256))
+        return max(min(int(output), 6), 0)
 
-    def set_weights(self, weights: Individual) -> None:
+    def set_weights(self, weights: np.ndarray) -> None:
         cpt = 0
         for param in self.parameters():
             tmp = np.prod(param.size())
