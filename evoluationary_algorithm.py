@@ -85,10 +85,10 @@ class EvolutionaryAlgorithm:
     def run(self) -> None:
         best_eval = -1e5
 
+        pbar = tqdm(total=self.max_iters, desc='Training', position=0, leave=True)
+
         population = self.random_population()
         evals = self.evaluate(individuals=population)
-
-        pbar = tqdm(total=self.max_iters, desc='Training', position=0, leave=True)
 
         for it in range(self.max_iters):
             pbar.update(1)

@@ -22,7 +22,7 @@ def main():
         individual_len=997,
         eval_maps=3,
         eval_iters=1000,
-        max_iters=5,
+        max_iters=50,
         mutation_chance=0.01,
     )
 
