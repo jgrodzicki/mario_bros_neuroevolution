@@ -89,12 +89,16 @@ class EvolutionaryAlgorithm:
         evals = self.evaluate(individuals=population)
 
         pbar = tqdm(total=self.max_iters, desc='Training', position=0, leave=True)
-        
+
         for it in range(self.max_iters):
             pbar.update(1)
 
             parents = self.parent_selection(population=population, evals=evals)
-            children = self.mutate(parents)
+            children = [Individual(weights=torch.Tensor([])) for _ in range(len(parents))]
+            for i in range(0, len(parents), 2):
+                children[i], children[i + 1] = self.crossover(parents[i], parents[i + 1])
+
+            children = self.mutate(children)
             children_evals = self.evaluate(individuals=children)
 
             population, evals = self.selection(
@@ -105,18 +109,19 @@ class EvolutionaryAlgorithm:
             )
 
             self.history_df.loc[len(self.history_df)] = [it, min(evals), mean(evals), max(evals)]
-            
-            if max(evals) > best_eval:
-                best_eval = max(evals)
-                pbar.desc = f'Training (best eval: {best_eval} in {it} iter)'
 
-                np.save(
-                    f'models/{type(self).__name__}/best_inds/{it}.npy',
-                    population[np.argmax(evals)],
-                    allow_pickle=True,
+            if max(evals) > best_eval:
+                best_at_it = it
+                best_eval = max(evals)
+
+                torch.save(
+                    population[np.argmax(evals)].weights,
+                    f'models/{type(self).__name__}/best_inds/{it}.tch',
                 )
 
-            if it % 50 == 0:
+            if (it + 1) % 50 == 0:
                 self.history_df.to_csv(f'models/{type(self).__name__}/history_df.csv', index=False)
+
+            pbar.desc = f'Training (evals: {min(evals)} | {mean(evals)} | {max(evals)}, best at: {best_at_it} it)'
 
         pbar.close()

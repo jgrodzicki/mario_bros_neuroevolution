@@ -1,4 +1,6 @@
 import numpy as np
+import operator
+from functools import reduce
 import torch
 from torch import nn
 
