@@ -18,7 +18,7 @@ class Network(nn.Module):
     def set_weights(self, weights: torch.Tensor) -> None:
         cpt = 0
         for param in self.parameters():
-            tmp = np.prod(param.size())
+            tmp = reduce(operator.mul, param.size())
 
             param.data.copy_(weights[cpt:cpt + tmp].view(param.size()).to(device))
             cpt += tmp

@@ -6,7 +6,7 @@ from nes_py.wrappers import JoypadSpace
 
 from evoluationary_algorithm import EvolutionaryAlgorithm
 from individual import Individual
-from network import Network
+from network import Network, device
 
 
 class ES(EvolutionaryAlgorithm):
@@ -17,15 +17,16 @@ class ES(EvolutionaryAlgorithm):
         network: Network,
         population_size: int,
         individual_len: int,
+        eval_maps: int,
         eval_iters: int,
         max_iters: int,
         mutation_chance: float,
     ):
-        super().__init__(env, network, population_size, individual_len, eval_iters, max_iters)
+        super().__init__(env, network, population_size, individual_len, eval_maps, eval_iters, max_iters)
         self.mutation_chance = mutation_chance
 
     def random_population(self) -> List[Individual]:
-        population = [Individual(weights=(np.random.rand(self.individual_len) - 0.5) * 10)
+        population = [Individual(weights=(torch.rand(self.individual_len).to(device) - 0.5) * 10)
                       for _ in range(self.population_size)]
         return population
 

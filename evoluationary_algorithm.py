@@ -2,13 +2,14 @@ from abc import abstractmethod
 import numpy as np
 import pandas as pd
 from statistics import mean
+import torch
 from typing import List, Tuple
 from tqdm import tqdm
 
 from nes_py.wrappers import JoypadSpace
 
 from individual import Individual
-from network import Network
+from network import Network, device
 
 
 class EvolutionaryAlgorithm:
@@ -19,12 +20,14 @@ class EvolutionaryAlgorithm:
         network: Network,
         population_size: int,
         individual_len: int,
+        eval_maps: int,
         eval_iters: int,
         max_iters: int,
     ) -> None:
         self.env = env
         self.population_size = population_size
         self.individual_len = individual_len
+        self.eval_maps = eval_maps
         self.eval_iters = eval_iters
         self.max_iters = max_iters
         self.history_df = pd.DataFrame(columns=['iteration', 'min eval', 'mean eval', 'max eval'])
@@ -38,20 +41,24 @@ class EvolutionaryAlgorithm:
         return list(map(lambda ind: self._evaluate_individual(individual=ind), individuals))
 
     def _evaluate_individual(self, individual: Individual) -> int:
-        state = self.env.reset()
         self.network.set_weights(individual.weights)
 
-        individual_reward: int = 0
+        cumulative_rewards = [0] * self.eval_maps
 
-        for _ in range(self.eval_iters):
-            action = self.network.forward(state)
-            state, reward, done, info = self.env.step(action)
-            individual_reward += reward
-            if done:
-                self.env.reset()
-                break
+        for map_i in range(self.eval_maps):
+            current_cumulative_reward = 0
+            state = self.env.reset()
 
-        return individual_reward
+            for _ in range(self.eval_iters):
+                action = self.network.forward(torch.Tensor(state.copy()).to(device))
+                state, reward, done, info = self.env.step(action)
+                current_cumulative_reward += reward
+                if done:
+                    break
+
+            cumulative_rewards[map_i] = current_cumulative_reward
+
+        return int(np.cbrt(np.prod(cumulative_rewards)))
 
     @abstractmethod
     def mutate(self, parents: List[Individual]) -> List[Individual]:

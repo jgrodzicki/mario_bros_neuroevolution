@@ -1,30 +1,29 @@
-from torch import nn
+import torch
 
 from nes_py.wrappers import JoypadSpace
 import gym_super_mario_bros
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
 from es import ES
-from network import Network, CUDA, DEFAULT_NETWORK
+from individual import Individual
+from network import DEFAULT_NETWORK, device
 
 
 def main():
     env = gym_super_mario_bros.make('SuperMarioBros-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
 
-    network = DEFAULT_NETWORK
-
-    if CUDA:
-        network = network.cuda()
+    network = DEFAULT_NETWORK.to(device)
 
     agent = ES(
         env=env,
         network=network,
-        population_size=50,
+        population_size=100,
         individual_len=997,
-        eval_iters=500,
+        eval_maps=3,
+        eval_iters=1000,
         max_iters=5,
-        mutation_chance=0.001,
+        mutation_chance=0.01,
     )
 
     agent.run()
